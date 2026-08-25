@@ -1,0 +1,33 @@
+name: Build MTG token pack
+
+on:
+  workflow_dispatch:
+    inputs:
+      count:
+        description: "Number of tokens"
+        default: "100"
+
+jobs:
+  tokens:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: false
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install requests pillow
+
+      - name: Fetch and convert tokens
+        run: python3 tools/fetch_mtg_tokens.py --count "${{ github.event.inputs.count }}" --out tokens
+
+      - name: Upload token pack
+        uses: actions/upload-artifact@v6
+        with:
+          name: mtg-tokens
+          path: tokens/
+          if-no-files-found: error
